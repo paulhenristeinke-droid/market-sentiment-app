@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Asset, getDefaultAsset } from "@/types/assets";
 import { NewsArticle } from "@/types/news";
-import { EconomicEvent } from "@/types/calendar";
 import { SentimentResponse } from "@/types/sentiment";
 import Header from "@/components/layout/Header";
 import TickerTape from "@/components/tradingview/TickerTape";
@@ -15,10 +14,8 @@ import SentimentDashboard from "@/components/sentiment/SentimentDashboard";
 export default function Dashboard() {
   const [selectedAsset, setSelectedAsset] = useState<Asset>(getDefaultAsset());
   const [news, setNews] = useState<NewsArticle[]>([]);
-  const [events, setEvents] = useState<EconomicEvent[]>([]);
   const [sentiment, setSentiment] = useState<SentimentResponse | null>(null);
   const [newsLoading, setNewsLoading] = useState(true);
-  const [calendarLoading, setCalendarLoading] = useState(true);
   const [sentimentLoading, setSentimentLoading] = useState(false);
 
   const fetchNewsData = useCallback(async (assetId: string) => {
@@ -32,19 +29,6 @@ export default function Dashboard() {
       setNews([]);
     }
     setNewsLoading(false);
-  }, []);
-
-  const fetchCalendarData = useCallback(async () => {
-    setCalendarLoading(true);
-    try {
-      const res = await fetch("/api/calendar");
-      const data = await res.json();
-      setEvents(data.events ?? []);
-    } catch (err) {
-      console.error("Failed to fetch calendar:", err);
-      setEvents([]);
-    }
-    setCalendarLoading(false);
   }, []);
 
   const fetchSentiment = useCallback(
@@ -68,9 +52,8 @@ export default function Dashboard() {
   // Fetch data on mount and when asset changes
   useEffect(() => {
     fetchNewsData(selectedAsset.id);
-    fetchCalendarData();
     fetchSentiment(selectedAsset.id);
-  }, [selectedAsset.id, fetchNewsData, fetchCalendarData, fetchSentiment]);
+  }, [selectedAsset.id, fetchNewsData, fetchSentiment]);
 
   const handleAssetChange = (asset: Asset) => {
     setSelectedAsset(asset);
@@ -108,7 +91,7 @@ export default function Dashboard() {
           />
 
           {/* Economic Calendar */}
-          <EconomicCalendar events={events} loading={calendarLoading} />
+          <EconomicCalendar />
         </div>
       </main>
 
@@ -116,7 +99,7 @@ export default function Dashboard() {
       <footer className="border-t border-[var(--card-border)] py-3 px-4 text-center">
         <p className="text-[10px] text-[var(--text-muted)]">
           MarketPulse — AI-powered market sentiment analysis. Data from NewsAPI,
-          FinnHub & TradingView. Sentiment by Claude AI. Not financial advice.
+          Tradays & TradingView. Sentiment by Claude AI. Not financial advice.
         </p>
       </footer>
     </div>
