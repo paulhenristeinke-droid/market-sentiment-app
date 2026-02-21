@@ -153,19 +153,28 @@ export async function generateSentiment(
       },
       generatedAt: now,
     };
-  } catch (error) {
-    console.error("Claude API error:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Claude API error:", errorMessage);
+
+    // Provide a more helpful fallback message based on the error
+    if (errorMessage.includes("credit balance") || errorMessage.includes("billing")) {
+      return createFallbackResponse(
+        asset,
+        "AI sentiment analysis unavailable — Anthropic API account has insufficient credits. News and calendar data are still available."
+      );
+    }
     return createFallbackResponse(asset);
   }
 }
 
-function createFallbackResponse(asset: Asset): SentimentResponse {
+function createFallbackResponse(asset: Asset, message?: string): SentimentResponse {
   const now = new Date().toISOString();
   const fallback: SentimentAnalysis = {
     timeframe: "daily",
     score: { direction: "neutral", score: 0, confidence: 0 },
     summary:
-      "Sentiment analysis unavailable. Please check your ANTHROPIC_API_KEY configuration.",
+      message ?? "Sentiment analysis unavailable. Please check your ANTHROPIC_API_KEY configuration.",
     keyDrivers: ["API key not configured or API error occurred"],
     riskFactors: ["Unable to assess risk factors without AI analysis"],
     generatedAt: now,
