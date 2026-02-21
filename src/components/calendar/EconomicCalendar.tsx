@@ -10,17 +10,33 @@ export default function EconomicCalendar() {
 
     containerRef.current.innerHTML = "";
 
-    const iframe = document.createElement("iframe");
-    iframe.src =
-      "https://www.tradays.com/en/economy/widget?dateFormat=MMM dd&impact=0&theme=1";
-    iframe.style.width = "100%";
-    iframe.style.height = "100%";
-    iframe.style.border = "none";
-    iframe.title = "Economic Calendar";
-    iframe.allow = "encrypted-media";
+    const widgetContainer = document.createElement("div");
+    widgetContainer.className = "tradingview-widget-container";
+    widgetContainer.style.height = "100%";
+    widgetContainer.style.width = "100%";
 
+    const widgetInner = document.createElement("div");
+    widgetInner.className = "tradingview-widget-container__widget";
+    widgetContainer.appendChild(widgetInner);
+
+    const script = document.createElement("script");
+    script.src =
+      "https://s3.tradingview.com/external-embedding/embed-widget-events.js";
+    script.async = true;
+    script.type = "text/javascript";
+    script.textContent = JSON.stringify({
+      colorTheme: "dark",
+      isTransparent: true,
+      width: "100%",
+      height: "100%",
+      locale: "en",
+      importanceFilter: "-1,0,1",
+      countryFilter: "us,eu,gb,jp,cn",
+    });
+
+    widgetContainer.appendChild(script);
     const currentContainer = containerRef.current;
-    currentContainer.appendChild(iframe);
+    currentContainer.appendChild(widgetContainer);
 
     return () => {
       currentContainer.innerHTML = "";
@@ -34,7 +50,7 @@ export default function EconomicCalendar() {
           Economic Calendar
         </h2>
         <span className="text-[10px] text-[var(--text-muted)]">
-          Powered by Tradays
+          Powered by TradingView
         </span>
       </div>
       <div className="flex-1" ref={containerRef} />

@@ -98,8 +98,8 @@ export default function Dashboard() {
       {/* Footer */}
       <footer className="border-t border-[var(--card-border)] py-3 px-4 text-center">
         <p className="text-[10px] text-[var(--text-muted)]">
-          MarketPulse — AI-powered market sentiment analysis. Data from NewsAPI,
-          Tradays & TradingView. Sentiment by Claude AI. Not financial advice.
+          MarketPulse — AI-powered market sentiment analysis. Data from NewsAPI
+          & TradingView. Sentiment by Claude AI. Not financial advice.
         </p>
       </footer>
     </div>

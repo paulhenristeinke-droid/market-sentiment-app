@@ -20,7 +20,7 @@ export default function AdvancedChart({ symbol }: AdvancedChartProps) {
     widgetContainer.style.width = "100%";
 
     const widgetInner = document.createElement("div");
-    widgetInner.id = "tradingview-chart";
+    widgetInner.className = "tradingview-widget-container__widget";
     widgetInner.style.height = "calc(100% - 32px)";
     widgetInner.style.width = "100%";
     widgetContainer.appendChild(widgetInner);
