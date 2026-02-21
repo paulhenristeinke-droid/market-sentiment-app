@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateSentiment } from "@/lib/api/anthropic";
 import { fetchFTNews } from "@/lib/api/ft-rss";
+import { fetchEconomicCalendar } from "@/lib/api/economic-calendar";
 import { getAssetById, getDefaultAsset } from "@/types/assets";
 import { getCached, setCache, SENTIMENT_CACHE_TTL } from "@/lib/cache";
 import { SentimentResponse } from "@/types/sentiment";
@@ -19,10 +20,13 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Fetch FT news for sentiment context
-  const news = await fetchFTNews(asset.id);
+  // Fetch FT news and economic calendar data in parallel
+  const [news, events] = await Promise.all([
+    fetchFTNews(asset.id),
+    fetchEconomicCalendar(asset.id),
+  ]);
 
-  const sentiment = await generateSentiment(asset, news, []);
+  const sentiment = await generateSentiment(asset, news, events);
   setCache(cacheKey, sentiment, SENTIMENT_CACHE_TTL);
 
   return NextResponse.json({ ...sentiment, cached: false });
