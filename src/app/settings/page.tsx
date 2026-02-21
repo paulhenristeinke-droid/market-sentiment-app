@@ -71,14 +71,6 @@ export default function SettingsPage() {
           </p>
           <div className="space-y-2 text-xs font-mono">
             <div className="flex items-center gap-2">
-              <span className="text-[var(--text-muted)]">NEWS_API_KEY</span>
-              <span className="text-[var(--accent-green)]">— newsapi.org</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[var(--text-muted)]">FINNHUB_API_KEY</span>
-              <span className="text-[var(--accent-green)]">— finnhub.io</span>
-            </div>
-            <div className="flex items-center gap-2">
               <span className="text-[var(--text-muted)]">ANTHROPIC_API_KEY</span>
               <span className="text-[var(--accent-green)]">— console.anthropic.com</span>
             </div>
@@ -87,6 +79,9 @@ export default function SettingsPage() {
               <span className="text-[var(--accent-green)]">— GitHub OAuth (optional)</span>
             </div>
           </div>
+          <p className="text-[10px] text-[var(--text-muted)] mt-3">
+            News powered by Financial Times RSS. Charts &amp; calendar powered by TradingView. No keys needed.
+          </p>
         </div>
       </div>
     </div>

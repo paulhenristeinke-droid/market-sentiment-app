@@ -74,7 +74,7 @@ export default function NewsFeed({ articles, loading }: NewsFeedProps) {
           </div>
         ) : filtered.length === 0 ? (
           <p className="text-xs text-[var(--text-muted)] text-center py-12">
-            No news articles found. Check your NEWS_API_KEY configuration.
+            No news articles found. FT feeds may be temporarily unavailable.
           </p>
         ) : (
           filtered.map((article, idx) => (
