@@ -38,7 +38,7 @@ export default function TickerTape() {
       symbols: TICKER_SYMBOLS,
       showSymbolLogo: true,
       isTransparent: true,
-      displayMode: "adaptive",
+      displayMode: "regular",
       colorTheme: "dark",
       locale: "en",
     });

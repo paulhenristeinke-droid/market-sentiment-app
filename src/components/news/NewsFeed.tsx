@@ -26,7 +26,7 @@ export default function NewsFeed({ articles, loading }: NewsFeedProps) {
       : articles.filter((a) => a.category === filter);
 
   return (
-    <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] flex flex-col h-full">
+    <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] flex flex-col h-full overflow-hidden">
       <div className="p-3 border-b border-[var(--card-border)]">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-semibold text-[var(--foreground)]">

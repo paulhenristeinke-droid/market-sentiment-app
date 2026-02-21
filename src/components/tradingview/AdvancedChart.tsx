@@ -43,7 +43,7 @@ export default function AdvancedChart({ symbol }: AdvancedChartProps) {
       calendar: false,
       support_host: "https://www.tradingview.com",
       hide_volume: false,
-      studies: ["RSI@tv-basicstudies", "MASimple@tv-basicstudies"],
+      studies: [],
     });
 
     widgetContainer.appendChild(script);
