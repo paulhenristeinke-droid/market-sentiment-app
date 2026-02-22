@@ -27,7 +27,12 @@ export async function GET(request: NextRequest) {
   ]);
 
   const sentiment = await generateSentiment(asset, news, events);
-  setCache(cacheKey, sentiment, SENTIMENT_CACHE_TTL);
+
+  // Only cache successful responses (confidence > 0 means real analysis, not fallback)
+  const isRealAnalysis = sentiment.daily.score.confidence > 0;
+  if (isRealAnalysis) {
+    setCache(cacheKey, sentiment, SENTIMENT_CACHE_TTL);
+  }
 
   return NextResponse.json({ ...sentiment, cached: false });
 }

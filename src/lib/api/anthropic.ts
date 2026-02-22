@@ -4,9 +4,12 @@ import { NewsArticle } from "@/types/news";
 import { EconomicEvent } from "@/types/calendar";
 import { Asset } from "@/types/assets";
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY ?? "",
-});
+// Lazy client — ensures API key is read at call time, not at module load time.
+// Creating the client at module scope can cause it to capture an empty key
+// if the module is evaluated before Next.js has loaded .env files.
+function getClient(apiKey: string): Anthropic {
+  return new Anthropic({ apiKey });
+}
 
 function buildPrompt(
   asset: Asset,
@@ -87,6 +90,7 @@ export async function generateSentiment(
   }
 
   try {
+    const client = getClient(apiKey);
     const prompt = buildPrompt(asset, news, events);
 
     const message = await client.messages.create({
@@ -157,14 +161,23 @@ export async function generateSentiment(
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Claude API error:", errorMessage);
 
-    // Provide a more helpful fallback message based on the error
+    // Surface a descriptive error in the fallback so it's visible in the UI
     if (errorMessage.includes("credit balance") || errorMessage.includes("billing")) {
       return createFallbackResponse(
         asset,
         "AI sentiment analysis unavailable — Anthropic API account has insufficient credits. News and calendar data are still available."
       );
     }
-    return createFallbackResponse(asset);
+    if (errorMessage.includes("authentication") || errorMessage.includes("401") || errorMessage.includes("api_key")) {
+      return createFallbackResponse(
+        asset,
+        "AI sentiment analysis unavailable — invalid API key. Please check your ANTHROPIC_API_KEY."
+      );
+    }
+    return createFallbackResponse(
+      asset,
+      `AI sentiment analysis temporarily unavailable — ${errorMessage}`
+    );
   }
 }
 
