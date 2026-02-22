@@ -1,49 +1,67 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 const TICKER_SYMBOLS = [
-  { proName: "OANDA:XAUUSD", title: "Gold", symbol: "XAUUSD" },
-  { proName: "OANDA:XAGUSD", title: "Silver", symbol: "XAGUSD" },
-  { proName: "OANDA:EURUSD", title: "EUR/USD", symbol: "EURUSD" },
-  { proName: "OANDA:GBPJPY", title: "GBP/JPY", symbol: "GBPJPY" },
-  { proName: "TVC:USOIL", title: "Crude Oil", symbol: "USOIL" },
-  { proName: "FOREXCOM:SPXUSD", title: "S&P 500", symbol: "SPX500" },
-  { proName: "FOREXCOM:NSXUSD", title: "NASDAQ", symbol: "NAS100" },
-  { proName: "TVC:DXY", title: "US Dollar Index", symbol: "DXY" },
-  { proName: "TVC:US10Y", title: "US 10Y Yield", symbol: "US10Y" },
+  { proName: "OANDA:XAUUSD", title: "Gold" },
+  { proName: "OANDA:XAGUSD", title: "Silver" },
+  { proName: "OANDA:EURUSD", title: "EUR/USD" },
+  { proName: "OANDA:GBPJPY", title: "GBP/JPY" },
+  { proName: "TVC:USOIL", title: "Crude Oil" },
+  { proName: "FOREXCOM:SPXUSD", title: "S&P 500" },
+  { proName: "FOREXCOM:NSXUSD", title: "NASDAQ" },
+  { proName: "TVC:DXY", title: "US Dollar Index" },
+  { proName: "TVC:US10Y", title: "US 10Y Yield" },
 ];
 
-function TickerItem({ item }: { item: (typeof TICKER_SYMBOLS)[number] }) {
-  return (
-    <a
-      href={`https://www.tradingview.com/symbols/${item.proName}/`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 px-6 whitespace-nowrap hover:opacity-80 transition-opacity"
-    >
-      <span className="text-xs font-semibold text-[var(--foreground)]">
-        {item.title}
-      </span>
-      <span className="text-[11px] text-[var(--text-muted)]">
-        {item.symbol}
-      </span>
-    </a>
-  );
+function createWidget(container: HTMLElement) {
+  const widgetContainer = document.createElement("div");
+  widgetContainer.className = "tradingview-widget-container";
+  widgetContainer.style.flexShrink = "0";
+  widgetContainer.style.width = "100vw";
+
+  const widgetInner = document.createElement("div");
+  widgetInner.className = "tradingview-widget-container__widget";
+  widgetContainer.appendChild(widgetInner);
+
+  const script = document.createElement("script");
+  script.src =
+    "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
+  script.async = true;
+  script.type = "text/javascript";
+  script.textContent = JSON.stringify({
+    symbols: TICKER_SYMBOLS,
+    showSymbolLogo: true,
+    isTransparent: true,
+    displayMode: "adaptive",
+    colorTheme: "dark",
+    locale: "en",
+  });
+
+  widgetContainer.appendChild(script);
+  container.appendChild(widgetContainer);
 }
 
 export default function TickerTape() {
-  const renderItems = () =>
-    TICKER_SYMBOLS.map((item) => (
-      <TickerItem key={item.symbol} item={item} />
-    ));
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!trackRef.current) return;
+    const track = trackRef.current;
+    track.innerHTML = "";
+
+    // Mount two identical TradingView widgets side by side
+    createWidget(track);
+    createWidget(track);
+
+    return () => {
+      track.innerHTML = "";
+    };
+  }, []);
 
   return (
-    <div className="border-b border-[var(--card-border)] overflow-hidden py-2.5 bg-[var(--card-bg)]">
-      <div className="marquee-track">
-        <div className="marquee-content">{renderItems()}</div>
-        <div className="marquee-content" aria-hidden="true">
-          {renderItems()}
-        </div>
-      </div>
+    <div className="border-b border-[var(--card-border)] overflow-hidden">
+      <div ref={trackRef} className="marquee-track" />
     </div>
   );
 }
