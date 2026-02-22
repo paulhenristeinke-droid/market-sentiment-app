@@ -49,10 +49,11 @@ export default function Dashboard() {
     []
   );
 
-  // Fetch data on mount and when asset changes
+  // Fetch data on mount and when asset changes — always refresh sentiment
+  // to avoid serving stale cached fallback responses
   useEffect(() => {
     fetchNewsData(selectedAsset.id);
-    fetchSentiment(selectedAsset.id);
+    fetchSentiment(selectedAsset.id, true);
   }, [selectedAsset.id, fetchNewsData, fetchSentiment]);
 
   const handleAssetChange = (asset: Asset) => {

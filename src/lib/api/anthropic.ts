@@ -86,8 +86,16 @@ export async function generateSentiment(
 ): Promise<SentimentResponse> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return createFallbackResponse(asset);
+    console.error("[Sentiment] ANTHROPIC_API_KEY is not set in environment");
+    return createFallbackResponse(
+      asset,
+      "ANTHROPIC_API_KEY is not configured. Add it to your .env file."
+    );
   }
+
+  console.log(
+    `[Sentiment] Calling Claude for ${asset.symbol} (key: ${apiKey.substring(0, 12)}..., news: ${news.length}, events: ${events.length})`
+  );
 
   try {
     const client = getClient(apiKey);
@@ -110,12 +118,19 @@ export async function generateSentiment(
     // Extract JSON from the response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error("No JSON found in Claude response");
-      return createFallbackResponse(asset);
+      console.error("[Sentiment] No JSON in Claude response:", responseText.substring(0, 200));
+      return createFallbackResponse(
+        asset,
+        "Claude returned an unexpected response format. Try refreshing."
+      );
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
     const now = new Date().toISOString();
+
+    console.log(
+      `[Sentiment] Success: daily=${parsed.daily.direction}(${parsed.daily.score}), weekly=${parsed.weekly.direction}(${parsed.weekly.score}), monthly=${parsed.monthly.direction}(${parsed.monthly.score})`
+    );
 
     return {
       asset: asset.id,
@@ -159,24 +174,23 @@ export async function generateSentiment(
     };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Claude API error:", errorMessage);
+    console.error("[Sentiment] Claude API error:", errorMessage);
 
-    // Surface a descriptive error in the fallback so it's visible in the UI
     if (errorMessage.includes("credit balance") || errorMessage.includes("billing")) {
       return createFallbackResponse(
         asset,
-        "AI sentiment analysis unavailable — Anthropic API account has insufficient credits. News and calendar data are still available."
+        "AI analysis unavailable — Anthropic API account has insufficient credits."
       );
     }
     if (errorMessage.includes("authentication") || errorMessage.includes("401") || errorMessage.includes("api_key")) {
       return createFallbackResponse(
         asset,
-        "AI sentiment analysis unavailable — invalid API key. Please check your ANTHROPIC_API_KEY."
+        "AI analysis unavailable — invalid API key. Check your ANTHROPIC_API_KEY."
       );
     }
     return createFallbackResponse(
       asset,
-      `AI sentiment analysis temporarily unavailable — ${errorMessage}`
+      `AI analysis temporarily unavailable — ${errorMessage}`
     );
   }
 }
